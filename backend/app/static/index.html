@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>Medical Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-page: #f3f4f6;
+      --bg-sidebar: #ffffff;
+      --bg-main: #f9fafb;
+      --bg-card: #ffffff;
+      --border-subtle: #e5e7eb;
+      --accent: #4f46e5;
+      --accent-soft: #eef2ff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --safe: #16a34a;
+      --chat-user: #4f46e5;
+      --chat-assistant: #e5e7eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .app-inner {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      background: var(--bg-main);
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.3);
+      margin: 24px;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+
+    .sidebar {
+      width: 280px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-subtle);
+      padding: 18px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+    }
+
+    .sidebar-title-block h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .sidebar-pill {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    .sidebar-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .sidebar-warning {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 6px;
+      line-height: 1.5;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #fef2f2;
+      border: 1px solid #fee2e2;
+    }
+
+    .sidebar-section {
+      padding-top: 8px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-section h2 {
+      font-size: 13px;
+      margin: 0 0 4px;
+    }
+
+    .sidebar-section p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0 0 8px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    select {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #f9fafb;
+      color: var(--text-main);
+      font-size: 12px;
+      outline: none;
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #9ca3af 50%),
+                        linear-gradient(135deg, #9ca3af 50%, transparent 50%);
+      background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(79,70,229,0.3);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .slider-row span {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 52px;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      flex: 1;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #f9fafb;
+      font-size: 12px;
+      outline: none;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(79,70,229,0.3);
+      background: #ffffff;
+    }
+
+    .status-box {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: #f3f4f6;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-top: 4px;
+      min-height: 34px;
+    }
+
+    .sidebar-footer-tag {
+      margin-top: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-subtle);
+    }
+
+    .sidebar-footer-tag strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Main */
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px 20px;
+      gap: 14px;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .main-header h2 {
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .main-header span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .badge-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+    }
+
+    .badge-inline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #16a34a;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      padding: 12px 14px 14px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .panel-caption {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .chat-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+
+    .chat-window {
+      flex: 1;
+      min-height: 260px;
+      max-height: 520px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 10px 10px 8px;
+      overflow-y: auto;
+    }
+
+    .chat-placeholder {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .chat-message {
+      display: flex;
+      margin-bottom: 8px;
+    }
+
+    .chat-message-inner {
+      max-width: 78%;
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .chat-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .chat-user { justify-content: flex-end; }
+
+    .chat-user .chat-message-inner {
+      background: var(--chat-user);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-assistant { justify-content: flex-start; }
+
+    .chat-assistant .chat-message-inner {
+      background: var(--chat-assistant);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      margin-top: 4px;
+    }
+
+    .chat-input-row textarea {
+      flex: 1;
+      min-height: 54px;
+      max-height: 120px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: #ffffff;
+      font-size: 13px;
+      resize: vertical;
+      outline: none;
+    }
+
+    .chat-input-row textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    .chat-input-row textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(79,70,229,0.25);
+    }
+
+    button {
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 18px rgba(79,70,229,0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    button span.icon {
+      display: inline-block;
+      transform: translateY(1px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .badge-safe {
+      background: #ecfdf3;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .badge-warning {
+      background: #fffbeb;
+      border-color: #fef3c7;
+      color: #854d0e;
+    }
+
+    .badge-emergency {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    #safety_message {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .severity-box {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .severity-box strong {
+      color: var(--text-main);
+    }
+
+    @media (max-width: 900px) {
+      .app-inner {
+        flex-direction: column;
+        margin: 0;
+        border-radius: 0;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="app-inner">
+      <!-- LEFT SIDEBAR -->
+      <aside class="sidebar">
+        <div>
+          <div class="sidebar-header">
+            <div class="logo-circle">M</div>
+            <div class="sidebar-title-block">
+              <h1>Medical Assistant Demo</h1>
+              <div class="sidebar-pill">Prototype</div>
+            </div>
+          </div>
+          <p class="sidebar-subtitle">
+            General health information powered by an LLM and a custom safety layer.
+          </p>
+          <div class="sidebar-warning">
+            This tool does <strong>not</strong> provide diagnoses or prescriptions.
+            For severe or emergency symptoms, please seek in-person care or call your local
+            emergency number.
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h2>Task type</h2>
+          <p>Select what kind of medical help you are asking for.</p>
+          <label for="task_type">Mode</label>
+          <select id="task_type">
+            <option value="medical_qa">General medical Q&amp;A</option>
+            <option value="diagnosis">Diagnostic reasoning (CoT)</option>
+            <option value="drug">Drug consultation</option>
+            <option value="lab">Lab / exam explanation</option>
+            <option value="education">Health education</option>
+          </select>
+        </div>
+
+        <div class="sidebar-section">
+          <h2>Answer language</h2>
+          <p>Switch between Chinese and English responses.</p>
+          <label for="language">Language</label>
+          <select id="language">
+            <option value="zh">中文 (Chinese)</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="sidebar-section">
+          <h2>Model controls</h2>
+          <p>Tune how creative and how long the answers are.</p>
+
+          <label for="temp_slider">Temperature</label>
+          <div class="slider-row">
+            <input id="temp_slider" type="range" min="0.1" max="1.0" step="0.05" value="0.2" />
+            <span id="temp_value">0.20</span>
+          </div>
+
+          <label for="max_tokens">Max tokens</label>
+          <input id="max_tokens" type="number" min="64" max="1024" step="32" value="512" />
+        </div>
+
+        <div class="sidebar-section">
+          <h2>Status</h2>
+          <p>Backend and model call status.</p>
+          <div id="status" class="status-box">
+            Ready. Type below and send to start a conversation.
+          </div>
+        </div>
+
+        <div class="sidebar-footer-tag">
+          Backend: <strong>FastAPI</strong> · Model: <strong>HF LLM</strong>
+        </div>
+      </aside>
+
+      <!-- RIGHT MAIN AREA -->
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <h2>Conversation</h2>
+            <span>Ask follow-up questions – context stays in the chat history (client-side).</span>
+          </div>
+          <div class="badge-inline">
+            <span class="badge-inline-dot"></span>
+            <span>LLM backend online</span>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Safety layer (last message)</div>
+              <div class="panel-caption">
+                Rule-based triage + model risk assessment for your most recent question.
+              </div>
+            </div>
+          </div>
+          <div id="safety_level"></div>
+          <p id="safety_message"></p>
+          <div id="severity_model" class="severity-box"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Chat</div>
+              <div class="panel-caption">
+                General information only · Not a diagnosis or treatment plan.
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-layout">
+            <div id="chat_window" class="chat-window">
+              <div class="chat-placeholder">
+                Start by typing your medical question below.  
+                Each turn will be added to this chat history.
+              </div>
+            </div>
+
+            <div class="chat-input-row">
+              <textarea id="question"
+                placeholder="For example: I have had chest pain for the past two days, I can walk more severely, and I have a little shortness of breath. What should be done?"></textarea>
+              <button id="ask_btn">
+                <span class="icon">➤</span>
+                <span>Send</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const askBtn = document.getElementById("ask_btn");
+    const statusEl = document.getElementById("status");
+    const chatWindowEl = document.getElementById("chat_window");
+    const safetyLevelEl = document.getElementById("safety_level");
+    const safetyMsgEl = document.getElementById("safety_message");
+    const severityModelEl = document.getElementById("severity_model");
+    const tempSlider = document.getElementById("temp_slider");
+    const tempValueEl = document.getElementById("temp_value");
+    const maxTokensInput = document.getElementById("max_tokens");
+
+    const messages = []; // chat history
+
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function updateTempLabel() {
+      tempValueEl.textContent = Number(tempSlider.value).toFixed(2);
+    }
+    tempSlider.addEventListener("input", updateTempLabel);
+    updateTempLabel();
+
+    function renderSafety(level, message) {
+      let cls = "badge-safe";
+      let text = "Non-emergency (general information)";
+
+      if (level === "warning") {
+        cls = "badge-warning";
+        text = "Potentially concerning – see a doctor soon";
+      } else if (level === "emergency") {
+        cls = "badge-emergency";
+        text = "Possible emergency";
+      }
+
+      safetyLevelEl.innerHTML =
+        `<span class="badge ${cls}">
+          <span class="badge-dot"></span>
+          <span>${text}</span>
+        </span>`;
+      safetyMsgEl.textContent = message || "";
+    }
+
+    function renderModelSeverity(info) {
+      if (!info || !info.severity) {
+        severityModelEl.textContent = "";
+        return;
+      }
+
+      const sev = (info.severity || "").toLowerCase();
+      let label = "Low severity";
+      let colorClass = "badge-safe";
+
+      if (sev === "moderate") {
+        label = "Moderate severity";
+        colorClass = "badge-warning";
+      } else if (sev === "high") {
+        label = "High severity";
+        colorClass = "badge-emergency";
+      }
+
+      const action = info.recommended_action || "";
+      const windowText = info.time_window || "";
+      const notes = info.risk_notes || "";
+
+      severityModelEl.innerHTML = `
+        <div style="margin-bottom:4px;">Model risk assessment</div>
+        <div style="margin-bottom:4px;">
+          <span class="badge ${colorClass}">
+            <span class="badge-dot"></span>
+            <span>${label}</span>
+          </span>
+        </div>
+        <div><strong>Recommended action:</strong> ${action || "n/a"}</div>
+        <div><strong>Time window:</strong> ${windowText || "n/a"}</div>
+        <div><strong>Notes:</strong> ${notes || "n/a"}</div>
+      `;
+    }
+
+    function getTaskLabel(taskType) {
+      switch (taskType) {
+        case "diagnosis":
+          return "Diagnostic reasoning (CoT)";
+        case "drug":
+          return "Drug consultation";
+        case "lab":
+          return "Lab / exam explanation";
+        case "education":
+          return "Health education";
+        default:
+          return "General medical Q&A";
+      }
+    }
+
+    function renderChat() {
+      if (messages.length === 0) {
+        chatWindowEl.innerHTML =
+          '<div class="chat-placeholder">Start by typing your medical question below.<br/>Each turn will be added to this chat history.</div>';
+        return;
+      }
+
+      chatWindowEl.innerHTML = "";
+      for (const msg of messages) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "chat-message " + (msg.role === "user" ? "chat-user" : "chat-assistant");
+
+        const inner = document.createElement("div");
+        inner.className = "chat-message-inner";
+
+        const meta = document.createElement("div");
+        meta.className = "chat-meta";
+
+        if (msg.role === "user") {
+          meta.textContent = `You · ${msg.taskLabel} · ${msg.time}`;
+        } else {
+          meta.textContent = `Assistant · ${msg.time}`;
+        }
+
+        const body = document.createElement("div");
+        body.textContent = msg.text;
+
+        inner.appendChild(meta);
+        inner.appendChild(body);
+        wrapper.appendChild(inner);
+        chatWindowEl.appendChild(wrapper);
+      }
+
+      chatWindowEl.scrollTop = chatWindowEl.scrollHeight;
+    }
+
+    askBtn.addEventListener("click", async () => {
+      const textarea = document.getElementById("question");
+      const question = textarea.value.trim();
+      const taskType = document.getElementById("task_type").value;
+      const language = document.getElementById("language").value;
+      const temperature = parseFloat(tempSlider.value);
+      const maxTokens = parseInt(maxTokensInput.value, 10) || 512;
+
+      if (!question) {
+        alert("Please enter a question first.");
+        return;
+      }
+
+      const now = new Date();
+      const taskLabel = getTaskLabel(taskType);
+
+      // Add user message to history
+      messages.push({
+        role: "user",
+        text: question,
+        taskType,
+        language,
+        taskLabel,
+        time: formatTime(now),
+      });
+      renderChat();
+
+      // Reset UI state
+      statusEl.textContent = "Calling backend and model, please wait…";
+      askBtn.disabled = true;
+
+      try {
+        const resp = await fetch("/api/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question,
+            task_type: taskType,
+            language,
+            temperature,
+            max_tokens: maxTokens,
+          }),
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP error ${resp.status}`);
+        }
+
+        const data = await resp.json();
+
+        // Update rule-based safety
+        if (data.safety) {
+          renderSafety(data.safety.level, data.safety.message);
+        } else {
+          renderSafety("safe", "");
+        }
+
+        // Update model-based severity
+        renderModelSeverity(data.severity);
+
+        // Add assistant message to history
+        const now2 = new Date();
+        messages.push({
+          role: "assistant",
+          text: data.answer || "",
+          taskType,
+          language,
+          taskLabel,
+          time: formatTime(now2),
+        });
+        renderChat();
+
+        statusEl.textContent = "Done.";
+        textarea.value = "";
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = "Error while calling backend. Please try again.";
+        messages.push({
+          role: "assistant",
+          text:
+            "Error: " + String(e) +
+            "\n\nThis tool cannot provide an answer right now. If you have urgent or severe symptoms, please seek in-person care.",
+          taskType: "error",
+          language: "en",
+          taskLabel: "Error",
+          time: formatTime(new Date()),
+        });
+        renderChat();
+        renderSafety(
+          "warning",
+          "An error occurred. This tool cannot provide an answer right now. "
+          + "If you have urgent or severe symptoms, please seek in-person care."
+        );
+        renderModelSeverity(null);
+      } finally {
+        askBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
